@@ -6,50 +6,37 @@ pipeline {
     }
 
     stages {
-        stage('Cleanup') {
+        stage('Prepare') {
             steps {
-                echo "Cleaning up old results..."
-                sh "rm -rf ${RESULTS_DIR}"
-                sh "mkdir -p ${RESULTS_DIR}"
+                sh 'rm -rf results'
+                sh 'mkdir results'
             }
         }
 
-        stage('Build Check') {
+        stage('Verify Environment') {
             steps {
-                echo "Verifying Environment..."
                 sh 'python3 --version'
                 sh 'robot --version'
-                sh 'chromium --version'
             }
         }
 
         stage('Run Robot Tests') {
             steps {
-                sh """
-                robot --outputdir ${RESULTS_DIR} \
-                      --variable BROWSER:headlesschrome \
-                      --variable REMOTE_URL:http://localhost:4444/wd/hub \
-                      --settag docker_run \
-                      tests/
-                """
+                sh 'robot --outputdir results tests/Lab8.robot'
             }
         }
     }
 
     post {
         always {
-            // Requires "Robot Framework Plugin" installed in Jenkins
             step([$class: 'RobotPublisher',
-                outputPath: "${RESULTS_DIR}",
+                outputPath: 'results',
                 outputFileName: 'output.xml',
                 reportFileName: 'report.html',
                 logFileName: 'log.html',
-                disableReports: false,
-                passThreshold: 100.0,
-                unstableThreshold: 80.0
+                passThreshold: 100,
+                unstableThreshold: 80
             ])
-            
-            archiveArtifacts artifacts: "${RESULTS_DIR}/*.*", allowEmptyArchive: true
         }
     }
 }
