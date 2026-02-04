@@ -22,7 +22,7 @@ pipeline {
 
         stage('Run Robot Tests') {
             steps {
-                sh 'robot --outputdir results test/Lab8.robot'
+                sh 'robot --outputdir results tests/Lab8.robot'
             }
         }
     }
@@ -40,3 +40,5 @@ pipeline {
         }
     }
 }
+
+
